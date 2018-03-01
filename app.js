@@ -41,7 +41,11 @@ var nodeSelection = svg
                       .enter()
                       .append("circle")
                         .attr("r", d => d.size)
-                        .attr("fill", d => d.color);
+                        .attr("fill", d => d.color)
+                        .call(d3.drag()
+                                .on("start", dragStart)
+                                .on("drag", drag)
+                                .on("end", dragEnd));
 
 var simulation = d3.forceSimulation(nodes);
 
@@ -56,6 +60,7 @@ simulation
 
 // prettier-ignore
 function ticked() {
+    console.log(simulation.alpha());
   nodeSelection
     .attr("cx", d => d.x)
     .attr("cy", d => d.y);
@@ -65,4 +70,26 @@ function ticked() {
     .attr("y1", d => d.source.y)
     .attr("x2", d => d.target.x)
     .attr("y2", d => d.target.y)
+}
+
+function dragStart(d) {
+  console.log("Starting to drag");
+  // manipulate the alpha target to prevent simulation cooling
+  simulation.alphaTarget(0.5).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+function drag(d) {
+  console.log("Dragging");
+  //   simulation.alpha(0.5).restart();
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function dragEnd(d) {
+  console.log("Done dragging");
+  simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
 }
